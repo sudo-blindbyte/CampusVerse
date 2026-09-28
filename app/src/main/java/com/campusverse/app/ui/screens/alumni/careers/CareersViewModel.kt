@@ -41,9 +41,11 @@ class CareersViewModel(
         loadCareersData()
     }
 
-    fun loadCareersData() {
+    fun loadCareersData(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = CareersUiState.Loading
+            if (showLoading && _uiState.value !is CareersUiState.Success) {
+                _uiState.value = CareersUiState.Loading
+            }
             val jobsRes = repository.getJobs(
                 search = currentSearch.ifBlank { null },
                 roleType = currentRoleType,
@@ -65,7 +67,7 @@ class CareersViewModel(
                     selectedRoleType = currentRoleType,
                     isRemoteOnly = currentRemoteOnly
                 )
-            } else {
+            } else if (_uiState.value !is CareersUiState.Success) {
                 _uiState.value = CareersUiState.Error(
                     jobsRes.exceptionOrNull()?.message ?: "Failed to load careers."
                 )
@@ -75,7 +77,11 @@ class CareersViewModel(
 
     fun onSearchChanged(query: String) {
         currentSearch = query
-        loadCareersData()
+        val curr = _uiState.value as? CareersUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadCareersData(showLoading = false)
     }
 
     fun selectRoleType(roleType: String?) {

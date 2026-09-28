@@ -94,4 +94,52 @@ class AdminEventsJobsViewModel(
                 }
         }
     }
+
+    fun createEvent(title: String, eventType: String, location: String, organizerName: String, organizerEmail: String, onSuccess: () -> Unit) {
+        if (title.isBlank() || location.isBlank()) return
+        viewModelScope.launch {
+            val newEvent = AdminEventItem(
+                id = "e_${System.currentTimeMillis()}",
+                title = title,
+                eventType = eventType,
+                date = "2026-10-01T10:00:00Z",
+                location = location,
+                status = "UPCOMING",
+                organizerName = organizerName.ifBlank { "Campus Admin" },
+                organizerEmail = organizerEmail.ifBlank { "admin@campusverse.edu" }
+            )
+            val current = _uiState.value
+            if (current is AdminEventsJobsUiState.Success) {
+                _uiState.value = current.copy(
+                    events = listOf(newEvent) + current.events,
+                    feedbackMessage = "Event '$title' created successfully."
+                )
+            }
+            onSuccess()
+        }
+    }
+
+    fun createJob(title: String, companyName: String, jobType: String, location: String, posterName: String, posterEmail: String, onSuccess: () -> Unit) {
+        if (title.isBlank() || companyName.isBlank()) return
+        viewModelScope.launch {
+            val newJob = AdminJobItem(
+                id = "j_${System.currentTimeMillis()}",
+                title = title,
+                companyName = companyName,
+                jobType = jobType,
+                location = location.ifBlank { "Remote" },
+                status = "ACTIVE",
+                posterName = posterName.ifBlank { "Campus Admin" },
+                posterEmail = posterEmail.ifBlank { "admin@campusverse.edu" }
+            )
+            val current = _uiState.value
+            if (current is AdminEventsJobsUiState.Success) {
+                _uiState.value = current.copy(
+                    jobs = listOf(newJob) + current.jobs,
+                    feedbackMessage = "Job listing '$title' created successfully."
+                )
+            }
+            onSuccess()
+        }
+    }
 }

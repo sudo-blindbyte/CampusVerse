@@ -92,19 +92,20 @@ private val AdminDarkColorScheme = darkColorScheme(
 
 @Composable
 fun AdminTheme(content: @Composable () -> Unit) {
+    val colorScheme = CampusLightColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as? Activity)?.window
             if (window != null) {
-                window.statusBarColor = AdminBackground.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+                window.statusBarColor = colorScheme.background.toArgb()
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
             }
         }
     }
 
     MaterialTheme(
-        colorScheme = AdminDarkColorScheme,
+        colorScheme = colorScheme,
         typography  = Typography,
         shapes      = Shapes,
         content     = content

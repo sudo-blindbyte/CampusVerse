@@ -38,9 +38,11 @@ class AdminUserManagementViewModel(
         loadUsers()
     }
 
-    fun loadUsers() {
+    fun loadUsers(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = AdminUserManagementUiState.Loading
+            if (showLoading && _uiState.value !is AdminUserManagementUiState.Success) {
+                _uiState.value = AdminUserManagementUiState.Loading
+            }
             repository.getUsers(search = currentSearch, role = currentRole, status = currentStatus)
                 .onSuccess { list ->
                     _uiState.value = AdminUserManagementUiState.Success(
@@ -51,14 +53,20 @@ class AdminUserManagementViewModel(
                     )
                 }
                 .onFailure { err ->
-                    _uiState.value = AdminUserManagementUiState.Error(err.message ?: "Failed to load users")
+                    if (_uiState.value !is AdminUserManagementUiState.Success) {
+                        _uiState.value = AdminUserManagementUiState.Error(err.message ?: "Failed to load users")
+                    }
                 }
         }
     }
 
     fun onSearchQueryChanged(query: String) {
         currentSearch = query
-        loadUsers()
+        val curr = _uiState.value as? AdminUserManagementUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadUsers(showLoading = false)
     }
 
     fun onRoleSelected(role: String?) {
@@ -129,6 +137,40 @@ class AdminUserManagementViewModel(
                         }
                         _uiState.value = current.copy(
                             actionFeedback = feedback
+                        )
+                    }
+                }
+        }
+    }
+
+    fun createUser(name: String, email: String, password: String, role: String, onSuccess: () -> Unit) {
+        if (name.isBlank() || email.isBlank() || password.isBlank()) return
+        viewModelScope.launch {
+            repository.createUser(name, email, password, role)
+                .onSuccess { newUser ->
+                    loadUsers(showLoading = false)
+                    val current = _uiState.value
+                    if (current is AdminUserManagementUiState.Success) {
+                        _uiState.value = current.copy(
+                            actionFeedback = "User ${newUser.fullName} created successfully."
+                        )
+                    }
+                    onSuccess()
+                }
+        }
+    }
+
+    fun deleteUser(userId: String) {
+        viewModelScope.launch {
+            repository.deleteUser(userId)
+                .onSuccess {
+                    val current = _uiState.value
+                    if (current is AdminUserManagementUiState.Success) {
+                        val updatedList = current.users.filterNot { it.id == userId }
+                        _uiState.value = current.copy(
+                            users = updatedList,
+                            selectedUserDetail = null,
+                            actionFeedback = "User account permanently deleted."
                         )
                     }
                 }

@@ -31,9 +31,11 @@ class LibraryViewModel(
         loadLibrary()
     }
 
-    fun loadLibrary(category: String = "ALL", search: String? = null) {
+    fun loadLibrary(category: String = "ALL", search: String? = null, showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = LibraryUiState.Loading
+            if (showLoading && _uiState.value !is LibraryUiState.Success) {
+                _uiState.value = LibraryUiState.Loading
+            }
             try {
                 val catParam = if (category == "ALL") null else category
                 val result = repository.getLibraryResources(search = search, category = catParam)
@@ -44,7 +46,9 @@ class LibraryViewModel(
                     searchQuery = search ?: ""
                 )
             } catch (e: Exception) {
-                _uiState.value = LibraryUiState.Error(e.message ?: "Failed to load library resources.")
+                if (_uiState.value !is LibraryUiState.Success) {
+                    _uiState.value = LibraryUiState.Error(e.message ?: "Failed to load library resources.")
+                }
             }
         }
     }
@@ -55,7 +59,11 @@ class LibraryViewModel(
     }
 
     fun searchLibrary(query: String) {
-        val currCat = (_uiState.value as? LibraryUiState.Success)?.selectedCategory ?: "ALL"
-        loadLibrary(category = currCat, search = query.ifBlank { null })
+        val currState = _uiState.value as? LibraryUiState.Success
+        if (currState != null) {
+            _uiState.value = currState.copy(searchQuery = query)
+        }
+        val currCat = currState?.selectedCategory ?: "ALL"
+        loadLibrary(category = currCat, search = query.ifBlank { null }, showLoading = false)
     }
 }

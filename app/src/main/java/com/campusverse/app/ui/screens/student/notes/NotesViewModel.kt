@@ -99,8 +99,10 @@ class NotesViewModel(
         }
     }
 
-    private suspend fun loadNotesInternal(userId: String, search: String? = null, tag: String? = null) {
-        _uiState.value = NotesUiState.Loading
+    private suspend fun loadNotesInternal(userId: String, search: String? = null, tag: String? = null, showLoading: Boolean = true) {
+        if (showLoading && _uiState.value !is NotesUiState.Success) {
+            _uiState.value = NotesUiState.Loading
+        }
         try {
             val prefsJson = prefsManager?.getModulePreferences(userId, "student_notes")
             val prefs = prefsJson?.let { StudentNotesPreferences.fromJson(it) }
@@ -135,13 +137,19 @@ class NotesViewModel(
                 selectedTab = currentTab
             )
         } catch (e: Exception) {
-            _uiState.value = NotesUiState.Error(e.message ?: "Failed to load notes.")
+            if (_uiState.value !is NotesUiState.Success) {
+                _uiState.value = NotesUiState.Error(e.message ?: "Failed to load notes.")
+            }
         }
     }
 
     fun searchNotes(query: String) {
+        val curr = _uiState.value as? NotesUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
         viewModelScope.launch {
-            loadNotesInternal(currentUserId, search = query.ifBlank { null })
+            loadNotesInternal(currentUserId, search = query.ifBlank { null }, showLoading = false)
         }
     }
 

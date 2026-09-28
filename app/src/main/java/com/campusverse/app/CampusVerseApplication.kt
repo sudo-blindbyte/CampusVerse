@@ -26,25 +26,19 @@ class CampusVerseApplication : Application() {
         val sessionManager = DataStoreSessionManager(sessionDataStore)
         val accountStore = DataStoreAccountStore(accountsDataStore)
 
-        val isEmulator = android.os.Build.FINGERPRINT.startsWith("generic") ||
-                android.os.Build.FINGERPRINT.startsWith("unknown") ||
-                android.os.Build.MODEL.contains("google_sdk") ||
-                android.os.Build.MODEL.contains("Emulator") ||
-                android.os.Build.MODEL.contains("Android SDK built for x86") ||
-                android.os.Build.MANUFACTURER.contains("Genymotion") ||
-                android.os.Build.HARDWARE.contains("goldfish") ||
-                android.os.Build.HARDWARE.contains("ranchu")
-        val defaultApiBaseUrl = if (isEmulator) "http://10.0.2.2:4000/api/v1" else "http://localhost:4000/api/v1"
+        val defaultApiBaseUrl = com.campusverse.app.data.network.ApiConfig.BASE_URL
+        val adminApiBaseUrl = com.campusverse.app.data.network.ApiConfig.ADMIN_BASE_URL
 
         AuthRepositoryImpl.instance = com.campusverse.app.data.repository.NetworkAuthRepository(
             baseUrl = defaultApiBaseUrl,
-            sessionManager = sessionManager
+            sessionManager = sessionManager,
+            accountStore = accountStore
         )
 
         val studentRepo = com.campusverse.app.data.repository.NetworkStudentRepository(baseUrl = defaultApiBaseUrl, sessionManager = sessionManager)
         val alumniRepo = com.campusverse.app.data.repository.NetworkAlumniRepository(baseUrl = defaultApiBaseUrl, sessionManager = sessionManager)
         val aspirantRepo = com.campusverse.app.data.repository.NetworkAspirantRepository(baseUrl = defaultApiBaseUrl, sessionManager = sessionManager)
-        val adminRepo = com.campusverse.app.data.repository.NetworkAdminRepository(baseUrl = "$defaultApiBaseUrl/admin", sessionManager = sessionManager)
+        val adminRepo = com.campusverse.app.data.repository.NetworkAdminRepository(baseUrl = adminApiBaseUrl, sessionManager = sessionManager)
         val paymentRepo = com.campusverse.app.data.repository.NetworkPaymentRepository(baseUrl = defaultApiBaseUrl, sessionManager = sessionManager)
         val modulePrefsManager = com.campusverse.app.data.preferences.ModulePreferencesManager.getInstance(this)
 
@@ -72,9 +66,15 @@ class CampusVerseApplication : Application() {
     private suspend fun seedDemoAccounts(accountStore: DataStoreAccountStore) {
         val demoAccounts = listOf(
             Triple("admin@campusverse.edu", "Super Administrator", UserRole.ADMIN to true),
-            Triple("student@campusverse.edu", "Rohan Mehta", UserRole.STUDENT to false),
+            Triple("student@campusverse.edu", "keval goswami", UserRole.STUDENT to false),
             Triple("alumni@campusverse.edu", "Dr. Aisha Patel", UserRole.ALUMNI to false),
-            Triple("aspirant@campusverse.edu", "Kavya Sharma", UserRole.ASPIRANT to false)
+            Triple("aspirant@campusverse.edu", "Kavya Sharma", UserRole.ASPIRANT to false),
+            Triple("admin@campusverse.local", "Super Administrator", UserRole.ADMIN to true),
+            Triple("student@campusverse.local", "keval goswami", UserRole.STUDENT to false),
+            Triple("alumni@campusverse.local", "Dr. Aisha Patel", UserRole.ALUMNI to false),
+            Triple("aspirant@campusverse.local", "Kavya Sharma", UserRole.ASPIRANT to false),
+            Triple("admin@campusverse.demo", "Super Administrator", UserRole.ADMIN to true),
+            Triple("student@campusverse.demo", "keval goswami", UserRole.STUDENT to false)
         )
 
         for ((email, name, roleInfo) in demoAccounts) {

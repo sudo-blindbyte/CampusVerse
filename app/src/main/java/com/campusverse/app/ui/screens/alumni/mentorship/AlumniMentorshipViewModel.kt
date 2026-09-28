@@ -38,9 +38,11 @@ class AlumniMentorshipViewModel(
         loadMentorshipData()
     }
 
-    fun loadMentorshipData() {
+    fun loadMentorshipData(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = AlumniMentorshipUiState.Loading
+            if (showLoading && _uiState.value !is AlumniMentorshipUiState.Success) {
+                _uiState.value = AlumniMentorshipUiState.Loading
+            }
             val mentorsRes = repository.getMentors(
                 search = currentSearch.ifBlank { null },
                 expertise = currentExpertise
@@ -56,7 +58,7 @@ class AlumniMentorshipViewModel(
                     searchQuery = currentSearch,
                     selectedExpertise = currentExpertise
                 )
-            } else {
+            } else if (_uiState.value !is AlumniMentorshipUiState.Success) {
                 _uiState.value = AlumniMentorshipUiState.Error(
                     mentorsRes.exceptionOrNull()?.message ?: "Failed to load mentorship hub."
                 )
@@ -66,7 +68,11 @@ class AlumniMentorshipViewModel(
 
     fun onSearchChanged(query: String) {
         currentSearch = query
-        loadMentorshipData()
+        val curr = _uiState.value as? AlumniMentorshipUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadMentorshipData(showLoading = false)
     }
 
     fun selectExpertise(expertise: String?) {

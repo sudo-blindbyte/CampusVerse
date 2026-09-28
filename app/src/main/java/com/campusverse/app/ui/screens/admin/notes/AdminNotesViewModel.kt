@@ -35,9 +35,11 @@ class AdminNotesViewModel(
         loadNotes()
     }
 
-    fun loadNotes() {
+    fun loadNotes(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = AdminNotesUiState.Loading
+            if (showLoading && _uiState.value !is AdminNotesUiState.Success) {
+                _uiState.value = AdminNotesUiState.Loading
+            }
             val statusParam = if (currentStatus == "ALL") null else currentStatus
             val searchParam = currentSearch.ifBlank { null }
             repository.getAdminNotes(status = statusParam, search = searchParam)
@@ -49,7 +51,9 @@ class AdminNotesViewModel(
                     )
                 }
                 .onFailure { err ->
-                    _uiState.value = AdminNotesUiState.Error(err.message ?: "Failed to load admin notes")
+                    if (_uiState.value !is AdminNotesUiState.Success) {
+                        _uiState.value = AdminNotesUiState.Error(err.message ?: "Failed to load admin notes")
+                    }
                 }
         }
     }
@@ -61,7 +65,11 @@ class AdminNotesViewModel(
 
     fun searchNotes(query: String) {
         currentSearch = query
-        loadNotes()
+        val curr = _uiState.value as? AdminNotesUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadNotes(showLoading = false)
     }
 
     fun moderateNote(noteId: String, action: String, reason: String? = null) {

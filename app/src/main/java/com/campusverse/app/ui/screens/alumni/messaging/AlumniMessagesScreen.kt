@@ -104,7 +104,7 @@ fun AlumniMessagesScreen(
                         item {
                             OutlinedTextField(
                                 value = state.searchQuery,
-                                onValueChange = { viewModel.loadConversations(it) },
+                                onValueChange = { viewModel.loadConversations(it, showLoading = false) },
                                 modifier = Modifier.fillMaxWidth(),
                                 placeholder = { Text("Search conversations...") },
                                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },

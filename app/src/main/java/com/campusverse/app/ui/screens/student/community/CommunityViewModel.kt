@@ -44,9 +44,11 @@ class CommunityViewModel(
         loadCommunities()
     }
 
-    fun loadCommunities(search: String? = null) {
+    fun loadCommunities(search: String? = null, showLoading: Boolean = true) {
         viewModelScope.launch {
-            _listState.value = CommunityListUiState.Loading
+            if (showLoading && _listState.value !is CommunityListUiState.Success) {
+                _listState.value = CommunityListUiState.Loading
+            }
             try {
                 val result = repository.getCommunities(search = search)
                 val list = result.getOrDefault(emptyList())
@@ -55,7 +57,9 @@ class CommunityViewModel(
                     searchQuery = search ?: ""
                 )
             } catch (e: Exception) {
-                _listState.value = CommunityListUiState.Error(e.message ?: "Failed to load communities.")
+                if (_listState.value !is CommunityListUiState.Success) {
+                    _listState.value = CommunityListUiState.Error(e.message ?: "Failed to load communities.")
+                }
             }
         }
     }

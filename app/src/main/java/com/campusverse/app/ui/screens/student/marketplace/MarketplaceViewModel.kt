@@ -43,9 +43,11 @@ class MarketplaceViewModel(
         loadMarketplace()
     }
 
-    fun loadMarketplace(category: String = "ALL", search: String? = null) {
+    fun loadMarketplace(category: String = "ALL", search: String? = null, showLoading: Boolean = true) {
         viewModelScope.launch {
-            _listState.value = MarketplaceListUiState.Loading
+            if (showLoading && _listState.value !is MarketplaceListUiState.Success) {
+                _listState.value = MarketplaceListUiState.Loading
+            }
             try {
                 val catParam = if (category == "ALL") null else category
                 val result = repository.getMarketplaceListings(search = search, category = catParam)
@@ -56,7 +58,9 @@ class MarketplaceViewModel(
                     searchQuery = search ?: ""
                 )
             } catch (e: Exception) {
-                _listState.value = MarketplaceListUiState.Error(e.message ?: "Failed to load marketplace items.")
+                if (_listState.value !is MarketplaceListUiState.Success) {
+                    _listState.value = MarketplaceListUiState.Error(e.message ?: "Failed to load marketplace items.")
+                }
             }
         }
     }
@@ -127,8 +131,12 @@ class MarketplaceViewModel(
     }
 
     fun search(query: String) {
-        val currCat = (_listState.value as? MarketplaceListUiState.Success)?.selectedCategory ?: "ALL"
-        loadMarketplace(category = currCat, search = query.ifBlank { null })
+        val currState = _listState.value as? MarketplaceListUiState.Success
+        if (currState != null) {
+            _listState.value = currState.copy(searchQuery = query)
+        }
+        val currCat = currState?.selectedCategory ?: "ALL"
+        loadMarketplace(category = currCat, search = query.ifBlank { null }, showLoading = false)
     }
 
     fun clearToast() {

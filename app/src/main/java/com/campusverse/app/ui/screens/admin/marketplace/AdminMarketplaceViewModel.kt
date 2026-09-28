@@ -36,9 +36,11 @@ class AdminMarketplaceViewModel(
         loadMarketplace()
     }
 
-    fun loadMarketplace() {
+    fun loadMarketplace(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = AdminMarketplaceUiState.Loading
+            if (showLoading && _uiState.value !is AdminMarketplaceUiState.Success) {
+                _uiState.value = AdminMarketplaceUiState.Loading
+            }
             repository.getMarketplaceListings(search = currentSearch, category = currentCategory)
                 .onSuccess { list ->
                     _uiState.value = AdminMarketplaceUiState.Success(
@@ -48,14 +50,20 @@ class AdminMarketplaceViewModel(
                     )
                 }
                 .onFailure { err ->
-                    _uiState.value = AdminMarketplaceUiState.Error(err.message ?: "Failed to load listings")
+                    if (_uiState.value !is AdminMarketplaceUiState.Success) {
+                        _uiState.value = AdminMarketplaceUiState.Error(err.message ?: "Failed to load listings")
+                    }
                 }
         }
     }
 
     fun onSearchChanged(query: String) {
         currentSearch = query
-        loadMarketplace()
+        val curr = _uiState.value as? AdminMarketplaceUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadMarketplace(showLoading = false)
     }
 
     fun onCategorySelected(cat: String) {

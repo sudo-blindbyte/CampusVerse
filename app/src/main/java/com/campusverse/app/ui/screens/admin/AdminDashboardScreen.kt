@@ -252,7 +252,7 @@ private fun DashboardContent(
                     value = "${m.totalUsers}",
                     subtitle = "${m.studentsCount} Stud • ${m.alumniCount} Alum",
                     icon = Icons.Filled.People,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                     onClick = onNavigateToUsers
                 )
@@ -261,7 +261,7 @@ private fun DashboardContent(
                     value = "${m.pendingVerifications}",
                     subtitle = "Pending Review",
                     icon = Icons.Filled.VerifiedUser,
-                    color = if (m.pendingVerifications > 0) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
+                    color = if (m.pendingVerifications > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                     modifier = Modifier.weight(1f),
                     onClick = onNavigateToVerification
                 )
@@ -284,7 +284,7 @@ private fun DashboardContent(
                     value = "${m.activeJobs + m.totalEvents}",
                     subtitle = "${m.activeJobs} Jobs • ${m.totalEvents} Events",
                     icon = Icons.Filled.EventNote,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                     onClick = onNavigateToEvents
                 )
@@ -313,49 +313,49 @@ private fun DashboardContent(
                     title = "Verification Queue",
                     description = "${m.pendingVerifications} institutional records awaiting review",
                     icon = Icons.Filled.VerifiedUser,
-                    iconColor = MaterialTheme.colorScheme.secondary,
+                    iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToVerification
                 )
                 AdminActionTile(
                     title = "Marketplace Moderation",
                     description = "${m.activeMarketplaceListings} listings live on student exchange",
                     icon = Icons.Filled.ShoppingBag,
-                    iconColor = MaterialTheme.colorScheme.secondary,
+                    iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToMarketplace
                 )
                 AdminActionTile(
                     title = "Notes Moderation",
                     description = "Review and moderate student-uploaded study notes & requests",
                     icon = Icons.Filled.MenuBook,
-                    iconColor = MaterialTheme.colorScheme.secondary,
+                    iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToNotes
                 )
                 AdminActionTile(
                     title = "Campus Events Oversight",
                     description = "${m.totalEvents} institutional workshops & hackathons scheduled",
                     icon = Icons.Filled.EventNote,
-                    iconColor = MaterialTheme.colorScheme.secondary,
+                    iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToEvents
                 )
                 AdminActionTile(
                     title = "Job Postings Oversight",
                     description = "${m.activeJobs} active career opportunities & internships",
                     icon = Icons.Filled.Work,
-                    iconColor = MaterialTheme.colorScheme.secondary,
+                    iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToJobs
                 )
                 AdminActionTile(
                     title = "Mentorship Oversight",
                     description = "Review alumni mentor profiles and session compliance",
                     icon = Icons.Filled.SupervisorAccount,
-                    iconColor = MaterialTheme.colorScheme.secondary,
+                    iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToMentorship
                 )
                 AdminActionTile(
                     title = "Broadcast Announcements",
                     description = "Publish targeted campus push broadcasts & system alerts",
                     icon = Icons.Filled.Campaign,
-                    iconColor = MaterialTheme.colorScheme.secondary,
+                    iconColor = MaterialTheme.colorScheme.primary,
                     onClick = onNavigateToAnnouncements
                 )
                 AdminActionTile(

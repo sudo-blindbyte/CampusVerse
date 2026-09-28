@@ -32,9 +32,11 @@ class EventsViewModel(
         loadEvents()
     }
 
-    fun loadEvents(category: String = "ALL", search: String? = null) {
+    fun loadEvents(category: String = "ALL", search: String? = null, showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = EventsUiState.Loading
+            if (showLoading && _uiState.value !is EventsUiState.Success) {
+                _uiState.value = EventsUiState.Loading
+            }
             try {
                 val catParam = if (category == "ALL") null else category
                 val result = repository.getEvents(search = search, category = catParam)
@@ -45,7 +47,9 @@ class EventsViewModel(
                     searchQuery = search ?: ""
                 )
             } catch (e: Exception) {
-                _uiState.value = EventsUiState.Error(e.message ?: "Failed to load events.")
+                if (_uiState.value !is EventsUiState.Success) {
+                    _uiState.value = EventsUiState.Error(e.message ?: "Failed to load events.")
+                }
             }
         }
     }
@@ -75,8 +79,12 @@ class EventsViewModel(
     }
 
     fun searchEvents(query: String) {
-        val currCat = (_uiState.value as? EventsUiState.Success)?.selectedCategory ?: "ALL"
-        loadEvents(category = currCat, search = query.ifBlank { null })
+        val currState = _uiState.value as? EventsUiState.Success
+        if (currState != null) {
+            _uiState.value = currState.copy(searchQuery = query)
+        }
+        val currCat = currState?.selectedCategory ?: "ALL"
+        loadEvents(category = currCat, search = query.ifBlank { null }, showLoading = false)
     }
 
     fun clearToast() {

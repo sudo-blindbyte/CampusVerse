@@ -8,9 +8,7 @@ import androidx.compose.ui.Modifier
 import com.campusverse.app.navigation.CampusVerseNavHost
 import com.campusverse.app.ui.theme.CampusVerseTheme
 
-/**
- * Top-level CampusVerse Composable.
- */
+
 @Composable
 fun CampusVerseApp() {
     CampusVerseTheme {

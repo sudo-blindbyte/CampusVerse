@@ -42,9 +42,11 @@ class AlumniNetworkViewModel(
         loadNetworkData()
     }
 
-    fun loadNetworkData() {
+    fun loadNetworkData(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = AlumniNetworkUiState.Loading
+            if (showLoading && _uiState.value !is AlumniNetworkUiState.Success) {
+                _uiState.value = AlumniNetworkUiState.Loading
+            }
             val alumniResult = repository.getAlumni(
                 search = currentSearch.ifBlank { null },
                 company = currentCompany,
@@ -64,7 +66,7 @@ class AlumniNetworkViewModel(
                     filterMentor = currentMentorFilter,
                     filterReferral = currentReferralFilter
                 )
-            } else {
+            } else if (_uiState.value !is AlumniNetworkUiState.Success) {
                 _uiState.value = AlumniNetworkUiState.Error(
                     alumniResult.exceptionOrNull()?.message ?: "Failed to load alumni network."
                 )
@@ -74,7 +76,11 @@ class AlumniNetworkViewModel(
 
     fun onSearchChanged(query: String) {
         currentSearch = query
-        loadNetworkData()
+        val curr = _uiState.value as? AlumniNetworkUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadNetworkData(showLoading = false)
     }
 
     fun toggleMentorFilter() {

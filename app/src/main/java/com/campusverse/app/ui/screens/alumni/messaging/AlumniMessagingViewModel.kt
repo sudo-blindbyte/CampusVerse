@@ -43,15 +43,23 @@ class AlumniMessagingViewModel(
         loadConversations()
     }
 
-    fun loadConversations(search: String? = null) {
+    fun loadConversations(search: String? = null, showLoading: Boolean = true) {
+        val currState = _conversationsState.value as? AlumniConversationsUiState.Success
+        if (currState != null && search != null) {
+            _conversationsState.value = currState.copy(searchQuery = search)
+        }
         viewModelScope.launch {
-            _conversationsState.value = AlumniConversationsUiState.Loading
+            if (showLoading && _conversationsState.value !is AlumniConversationsUiState.Success) {
+                _conversationsState.value = AlumniConversationsUiState.Loading
+            }
             repository.getConversations(search)
                 .onSuccess { list ->
                     _conversationsState.value = AlumniConversationsUiState.Success(list, search ?: "")
                 }
                 .onFailure { err ->
-                    _conversationsState.value = AlumniConversationsUiState.Error(err.message ?: "Failed to load conversations.")
+                    if (_conversationsState.value !is AlumniConversationsUiState.Success) {
+                        _conversationsState.value = AlumniConversationsUiState.Error(err.message ?: "Failed to load conversations.")
+                    }
                 }
         }
     }

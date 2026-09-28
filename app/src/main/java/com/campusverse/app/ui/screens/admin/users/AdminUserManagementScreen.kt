@@ -1,6 +1,5 @@
 package com.campusverse.app.ui.screens.admin.users
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -21,12 +20,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.AlertDialog
@@ -38,6 +36,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -64,12 +63,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.campusverse.app.data.model.AdminUserItem
 import com.campusverse.app.navigation.Screen
 import com.campusverse.app.ui.screens.admin.components.AdminBottomBar
-
 import com.campusverse.app.ui.theme.AdminTheme
 
 /**
  * ADM — User Management Screen
- * Directory, status controls, role reassignments, and password resets for CampusVerse users.
+ * Complete CRUD: Directory, status controls, user creation, deletion, role reassignments, and password resets.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +79,7 @@ fun AdminUserManagementScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showCreateUserDialog by remember { mutableStateOf(false) }
 
     AdminTheme {
         Scaffold(
@@ -108,6 +107,15 @@ fun AdminUserManagementScreen(
                         titleContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { showCreateUserDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Create User")
+                }
             },
             bottomBar = {
                 AdminBottomBar(
@@ -147,9 +155,21 @@ fun AdminUserManagementScreen(
                         onSelectUser = { viewModel.onSelectUserForDetail(it) },
                         onToggleSuspend = { viewModel.toggleUserSuspension(it) },
                         onChangeRole = { u, r -> viewModel.changeUserRole(u, r) },
-                        onResetPassword = { viewModel.resetPassword(it) }
+                        onResetPassword = { viewModel.resetPassword(it) },
+                        onDeleteUser = { viewModel.deleteUser(it) }
                     )
                 }
+            }
+
+            if (showCreateUserDialog) {
+                CreateUserDialog(
+                    onDismiss = { showCreateUserDialog = false },
+                    onCreate = { name, email, pass, role ->
+                        viewModel.createUser(name, email, pass, role) {
+                            showCreateUserDialog = false
+                        }
+                    }
+                )
             }
         }
     }
@@ -165,10 +185,12 @@ private fun UserManagementContent(
     onSelectUser: (AdminUserItem?) -> Unit,
     onToggleSuspend: (AdminUserItem) -> Unit,
     onChangeRole: (String, String) -> Unit,
-    onResetPassword: (String) -> Unit
+    onResetPassword: (String) -> Unit,
+    onDeleteUser: (String) -> Unit
 ) {
     var showRoleDialogForUser by remember { mutableStateOf<AdminUserItem?>(null) }
     var showSuspendConfirmForUser by remember { mutableStateOf<AdminUserItem?>(null) }
+    var showDeleteConfirmForUser by remember { mutableStateOf<AdminUserItem?>(null) }
 
     Column(
         modifier = Modifier
@@ -197,15 +219,15 @@ private fun UserManagementContent(
             value = state.searchQuery,
             onValueChange = onSearch,
             placeholder = { Text("Search users by name or email...") },
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.secondary) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.secondary,
-                focusedLabelColor = MaterialTheme.colorScheme.secondary
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                focusedLabelColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -225,8 +247,8 @@ private fun UserManagementContent(
                     onClick = { onRoleFilter(if (role == "ALL") null else role) },
                     label = { Text(role.replace("_", " ")) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
-                        selectedLabelColor = MaterialTheme.colorScheme.secondary
+                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        selectedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
             }
@@ -279,23 +301,6 @@ private fun UserManagementContent(
                     if (!u.location.isNullOrBlank()) Text(text = "Location: ${u.location}", style = MaterialTheme.typography.bodySmall)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    if (!state.actionFeedback.isNullOrBlank()) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = state.actionFeedback,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(10.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-
                     OutlinedButton(
                         onClick = { onResetPassword(u.id) },
                         modifier = Modifier.fillMaxWidth()
@@ -304,12 +309,48 @@ private fun UserManagementContent(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Reset User Password")
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(
+                        onClick = { showDeleteConfirmForUser = u },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Delete User Account")
+                    }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { onSelectUser(null) }) {
                     Text("Close")
                 }
+            }
+        )
+    }
+
+    // Delete Confirmation Dialog
+    if (showDeleteConfirmForUser != null) {
+        val target = showDeleteConfirmForUser!!
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmForUser = null },
+            title = { Text("Delete User Permanently?", fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to permanently delete '${target.fullName}' (${target.email})? This action cannot be undone.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDeleteUser(target.id)
+                        showDeleteConfirmForUser = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete Account")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmForUser = null }) { Text("Cancel") }
             }
         )
     }
@@ -382,6 +423,76 @@ private fun UserManagementContent(
             }
         )
     }
+}
+
+@Composable
+private fun CreateUserDialog(
+    onDismiss: () -> Unit,
+    onCreate: (String, String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("STUDENT") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Create New User", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Full Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email Address") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Initial Password") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text("User Role", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf("STUDENT", "ALUMNI", "ASPIRANT", "ADMIN").forEach { r ->
+                        FilterChip(
+                            selected = role == r,
+                            onClick = { role = r },
+                            label = { Text(r.take(3)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                            )
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onCreate(name, email, password, role) },
+                enabled = name.isNotBlank() && email.isNotBlank() && password.length >= 6,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Text("Create User")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }
 
 @Composable

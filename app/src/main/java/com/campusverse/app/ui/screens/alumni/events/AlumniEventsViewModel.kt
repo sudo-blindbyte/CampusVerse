@@ -34,9 +34,11 @@ class AlumniEventsViewModel(
         loadEvents()
     }
 
-    fun loadEvents() {
+    fun loadEvents(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = AlumniEventsUiState.Loading
+            if (showLoading && _uiState.value !is AlumniEventsUiState.Success) {
+                _uiState.value = AlumniEventsUiState.Loading
+            }
             repository.getEvents(
                 search = currentSearch.ifBlank { null },
                 category = currentCategory
@@ -49,14 +51,20 @@ class AlumniEventsViewModel(
                     )
                 }
                 .onFailure { err ->
-                    _uiState.value = AlumniEventsUiState.Error(err.message ?: "Failed to load events.")
+                    if (_uiState.value !is AlumniEventsUiState.Success) {
+                        _uiState.value = AlumniEventsUiState.Error(err.message ?: "Failed to load events.")
+                    }
                 }
         }
     }
 
     fun onSearchChanged(query: String) {
         currentSearch = query
-        loadEvents()
+        val curr = _uiState.value as? AlumniEventsUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadEvents(showLoading = false)
     }
 
     fun selectCategory(category: String?) {

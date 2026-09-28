@@ -38,9 +38,11 @@ class CollegeExplorerViewModel(
         loadColleges()
     }
 
-    fun loadColleges() {
+    fun loadColleges(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = CollegeExplorerUiState.Loading
+            if (showLoading && _uiState.value !is CollegeExplorerUiState.Success) {
+                _uiState.value = CollegeExplorerUiState.Loading
+            }
             repository.getColleges(
                 search = currentSearch.ifBlank { null },
                 country = currentCountry,
@@ -55,14 +57,20 @@ class CollegeExplorerViewModel(
                     selectedSortBy = currentSort
                 )
             }.onFailure { err ->
-                _uiState.value = CollegeExplorerUiState.Error(err.message ?: "Failed to load colleges")
+                if (_uiState.value !is CollegeExplorerUiState.Success) {
+                    _uiState.value = CollegeExplorerUiState.Error(err.message ?: "Failed to load colleges")
+                }
             }
         }
     }
 
     fun onSearchQueryChanged(query: String) {
         currentSearch = query
-        loadColleges()
+        val curr = _uiState.value as? CollegeExplorerUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadColleges(showLoading = false)
     }
 
     fun onCountrySelected(country: String?) {

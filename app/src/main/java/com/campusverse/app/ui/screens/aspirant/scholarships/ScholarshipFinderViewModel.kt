@@ -34,9 +34,11 @@ class ScholarshipFinderViewModel(
         loadScholarships()
     }
 
-    fun loadScholarships() {
+    fun loadScholarships(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = ScholarshipFinderUiState.Loading
+            if (showLoading && _uiState.value !is ScholarshipFinderUiState.Success) {
+                _uiState.value = ScholarshipFinderUiState.Loading
+            }
             repository.getScholarships(
                 search = currentSearch.ifBlank { null },
                 category = currentCategory
@@ -47,14 +49,20 @@ class ScholarshipFinderViewModel(
                     selectedCategory = currentCategory
                 )
             }.onFailure { err ->
-                _uiState.value = ScholarshipFinderUiState.Error(err.message ?: "Failed to load scholarships")
+                if (_uiState.value !is ScholarshipFinderUiState.Success) {
+                    _uiState.value = ScholarshipFinderUiState.Error(err.message ?: "Failed to load scholarships")
+                }
             }
         }
     }
 
     fun onSearchQueryChanged(query: String) {
         currentSearch = query
-        loadScholarships()
+        val curr = _uiState.value as? ScholarshipFinderUiState.Success
+        if (curr != null) {
+            _uiState.value = curr.copy(searchQuery = query)
+        }
+        loadScholarships(showLoading = false)
     }
 
     fun onCategorySelected(category: String?) {

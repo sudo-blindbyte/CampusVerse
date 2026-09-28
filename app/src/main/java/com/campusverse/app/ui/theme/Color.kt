@@ -2,7 +2,7 @@ package com.campusverse.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ── Stitch / Figma light palette (student · alumni · aspirant) ──────────────
+//student · alumni · aspirant ──────────────
 val Primary = Color(0xFF5341CD)
 val OnPrimary = Color(0xFFFFFFFF)
 val PrimaryContainer = Color(0xFF6C5CE7)

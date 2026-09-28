@@ -21,6 +21,8 @@ interface AdminRepository {
     suspend fun getUserDetails(userId: String): Result<AdminUserItem>
     suspend fun updateUserStatus(userId: String, isActive: Boolean? = null, role: String? = null, reason: String? = null): Result<AdminUserItem>
     suspend fun resetUserPassword(userId: String): Result<String>
+    suspend fun createUser(name: String, email: String, password: String, role: String): Result<AdminUserItem>
+    suspend fun deleteUser(userId: String): Result<Boolean>
 
     // 3. Verifications
     suspend fun getVerifications(status: String? = null): Result<List<AdminVerificationItem>>
