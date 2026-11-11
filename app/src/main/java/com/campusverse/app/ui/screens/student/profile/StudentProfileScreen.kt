@@ -65,6 +65,7 @@ import com.campusverse.app.ui.components.CampusVerseTopBar
 fun StudentProfileScreen(
     currentUser: com.campusverse.app.domain.auth.AuthenticatedUser? = null,
     onNavigateBack: () -> Unit,
+    onNavigateToRoute: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: StudentProfileViewModel = viewModel()
 ) {
@@ -96,6 +97,12 @@ fun StudentProfileScreen(
                         )
                     }
                 }
+            )
+        },
+        bottomBar = {
+            com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                currentRoute = com.campusverse.app.navigation.Screen.StudentProfile.route,
+                onNavigate = { route -> onNavigateToRoute?.invoke(route) }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -386,8 +393,6 @@ fun StudentProfileScreen(
                         CampusVerseButton(
                             text = "Save Profile Changes",
                             onClick = {
-                                val sem = semesterText.toIntOrNull() ?: profile.semester
-                                val cg = cgpaText.toDoubleOrNull() ?: profile.cgpa
                                 val sList = skillsText.split(",").map { it.trim() }.filter { it.isNotBlank() }
                                 viewModel.saveProfile(
                                     fullName = fullName,
@@ -395,8 +400,8 @@ fun StudentProfileScreen(
                                     location = location,
                                     degree = degree,
                                     branch = branch,
-                                    semester = sem,
-                                    cgpa = cg,
+                                    semesterText = semesterText,
+                                    cgpaText = cgpaText,
                                     skills = sList
                                 )
                             },

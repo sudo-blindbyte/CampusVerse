@@ -159,6 +159,7 @@ fun AlumniNetworkScreen(
             val alumni = selectedAlumniForDetail!!
             androidx.compose.material3.ModalBottomSheet(
                 onDismissRequest = { selectedAlumniForDetail = null },
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                 containerColor = MaterialTheme.colorScheme.surface
             ) {
                 Column(

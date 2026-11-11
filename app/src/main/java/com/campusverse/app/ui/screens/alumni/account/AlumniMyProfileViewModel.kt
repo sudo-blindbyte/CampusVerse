@@ -43,6 +43,20 @@ class AlumniMyProfileViewModel(
 
     fun saveProfile(updated: AlumniProfileData) {
         val current = _uiState.value as? AlumniMyProfileUiState.Success ?: return
+
+        if (updated.fullName.isBlank()) {
+            _uiState.value = current.copy(isSaving = false, saveMessage = "Full Name cannot be empty.")
+            return
+        }
+        if (updated.company.isBlank()) {
+            _uiState.value = current.copy(isSaving = false, saveMessage = "Company Name cannot be empty.")
+            return
+        }
+        if (updated.designation.isBlank()) {
+            _uiState.value = current.copy(isSaving = false, saveMessage = "Designation cannot be empty.")
+            return
+        }
+
         _uiState.value = current.copy(isSaving = true, saveMessage = null)
 
         viewModelScope.launch {

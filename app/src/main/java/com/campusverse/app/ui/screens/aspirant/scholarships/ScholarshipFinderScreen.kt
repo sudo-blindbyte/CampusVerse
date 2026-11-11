@@ -169,6 +169,7 @@ fun ScholarshipFinderScreen(
         if (selectedScholarshipId != null) {
             androidx.compose.material3.ModalBottomSheet(
                 onDismissRequest = { selectedScholarshipId = null },
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                 containerColor = MaterialTheme.colorScheme.background
             ) {
                 ScholarshipDetailScreen(

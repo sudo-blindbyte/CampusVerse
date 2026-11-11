@@ -71,6 +71,7 @@ fun StudentNotesPreScreen(
     currentUser: AuthenticatedUser?,
     onCompleted: () -> Unit,
     onNavigateBack: (() -> Unit)? = null,
+    onNavigateToRoute: ((String) -> Unit)? = null,
     viewModel: StudentNotesPreScreenViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -107,7 +108,13 @@ fun StudentNotesPreScreen(
             }
         },
         continueButtonText = if (currentStep == 1) "Continue to Formats" else "Save & Personalize Notes",
-        isLoading = state.isSaving
+        isLoading = state.isSaving,
+        bottomBarContent = {
+            com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                onNavigate = { route -> onNavigateToRoute?.invoke(route) }
+            )
+        }
     ) {
         if (state.errorMessage != null) {
             CampusVerseErrorMessage(message = state.errorMessage)

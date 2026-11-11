@@ -65,6 +65,7 @@ import com.campusverse.app.ui.components.CampusVerseTopBar
 fun AcademicsScreen(
     currentUser: AuthenticatedUser? = null,
     onNavigateBack: () -> Unit,
+    onNavigateToRoute: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: AcademicsViewModel = viewModel()
 ) {
@@ -81,7 +82,8 @@ fun AcademicsScreen(
             StudentAcademicsPreScreen(
                 currentUser = currentUser,
                 onCompleted = { viewModel.onPreScreenCompleted(currentUser) },
-                onNavigateBack = onNavigateBack
+                onNavigateBack = onNavigateBack,
+                onNavigateToRoute = onNavigateToRoute
             )
         }
         is AcademicsUiState.Loading -> {
@@ -91,6 +93,12 @@ fun AcademicsScreen(
                         title = "Academics",
                         canNavigateBack = true,
                         onNavigateBack = onNavigateBack
+                    )
+                },
+                bottomBar = {
+                    com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                        currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                        onNavigate = { route -> onNavigateToRoute?.invoke(route) }
                     )
                 },
                 modifier = modifier.fillMaxSize(),
@@ -113,6 +121,12 @@ fun AcademicsScreen(
                         title = "Academics",
                         canNavigateBack = true,
                         onNavigateBack = onNavigateBack
+                    )
+                },
+                bottomBar = {
+                    com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                        currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                        onNavigate = { route -> onNavigateToRoute?.invoke(route) }
                     )
                 },
                 modifier = modifier.fillMaxSize(),
@@ -150,6 +164,12 @@ fun AcademicsScreen(
                                 )
                             }
                         }
+                    )
+                },
+                bottomBar = {
+                    com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                        currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                        onNavigate = { route -> onNavigateToRoute?.invoke(route) }
                     )
                 },
                 modifier = modifier.fillMaxSize(),

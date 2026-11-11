@@ -60,6 +60,7 @@ import com.campusverse.app.ui.components.CampusVerseTopBar
 @Composable
 fun LibraryScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToRoute: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: LibraryViewModel = viewModel()
 ) {
@@ -72,6 +73,7 @@ fun LibraryScreen(
     if (openedResource != null) {
         AlertDialog(
             onDismissRequest = { openedResource = null },
+            shape = RoundedCornerShape(20.dp),
             title = { Text(openedResource!!.title, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
@@ -99,6 +101,12 @@ fun LibraryScreen(
                 title = "Library",
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
+            )
+        },
+        bottomBar = {
+            com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                onNavigate = { route -> onNavigateToRoute?.invoke(route) }
             )
         },
         modifier = modifier.fillMaxSize(),

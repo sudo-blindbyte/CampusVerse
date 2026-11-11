@@ -80,6 +80,7 @@ fun StudentAcademicsPreScreen(
     currentUser: AuthenticatedUser?,
     onCompleted: () -> Unit,
     onNavigateBack: (() -> Unit)? = null,
+    onNavigateToRoute: ((String) -> Unit)? = null,
     viewModel: StudentAcademicsPreScreenViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -116,7 +117,13 @@ fun StudentAcademicsPreScreen(
             }
         },
         continueButtonText = if (currentStep == 1) "Continue to Focus Areas" else "Save & Personalize Academics",
-        isLoading = state.isSaving
+        isLoading = state.isSaving,
+        bottomBarContent = {
+            com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                onNavigate = { route -> onNavigateToRoute?.invoke(route) }
+            )
+        }
     ) {
         if (state.errorMessage != null) {
             CampusVerseErrorMessage(message = state.errorMessage)

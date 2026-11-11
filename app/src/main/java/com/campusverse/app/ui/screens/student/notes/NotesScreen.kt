@@ -80,6 +80,7 @@ fun NotesScreen(
     currentUser: AuthenticatedUser? = null,
     onNavigateBack: () -> Unit,
     onNavigateToCreateNote: () -> Unit = {},
+    onNavigateToRoute: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: NotesViewModel = viewModel()
 ) {
@@ -206,7 +207,8 @@ fun NotesScreen(
             StudentNotesPreScreen(
                 currentUser = currentUser,
                 onCompleted = { viewModel.onPreScreenCompleted(currentUser) },
-                onNavigateBack = onNavigateBack
+                onNavigateBack = onNavigateBack,
+                onNavigateToRoute = onNavigateToRoute
             )
         }
         is NotesUiState.Loading -> {
@@ -216,6 +218,12 @@ fun NotesScreen(
                         title = "Notes Hub",
                         canNavigateBack = true,
                         onNavigateBack = onNavigateBack
+                    )
+                },
+                bottomBar = {
+                    com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                        currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                        onNavigate = { route -> onNavigateToRoute?.invoke(route) }
                     )
                 },
                 modifier = modifier.fillMaxSize(),
@@ -238,6 +246,12 @@ fun NotesScreen(
                         title = "Notes Hub",
                         canNavigateBack = true,
                         onNavigateBack = onNavigateBack
+                    )
+                },
+                bottomBar = {
+                    com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                        currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                        onNavigate = { route -> onNavigateToRoute?.invoke(route) }
                     )
                 },
                 modifier = modifier.fillMaxSize(),
@@ -282,6 +296,12 @@ fun NotesScreen(
                                 )
                             }
                         }
+                    )
+                },
+                bottomBar = {
+                    com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                        currentRoute = com.campusverse.app.navigation.Screen.Academics.route,
+                        onNavigate = { route -> onNavigateToRoute?.invoke(route) }
                     )
                 },
                 floatingActionButton = {
@@ -534,6 +554,7 @@ fun NotesScreen(
             if (showCreateNoteSheet) {
                 androidx.compose.material3.ModalBottomSheet(
                     onDismissRequest = { showCreateNoteSheet = false },
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                     containerColor = MaterialTheme.colorScheme.surface
                 ) {
                     Column(

@@ -1,10 +1,7 @@
 package com.campusverse.app.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -16,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 /**
- * Reusable, Stitch-compliant scaffold for module-specific pre-screens.
+ * Reusable scaffold for module-specific pre-screens with bottom bar support.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +53,7 @@ fun ModulePreScreenScaffold(
     continueButtonText: String = "Continue",
     isContinueEnabled: Boolean = true,
     isLoading: Boolean = false,
+    bottomBarContent: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Scaffold(
@@ -101,28 +98,29 @@ fun ModulePreScreenScaffold(
             )
         },
         bottomBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 8.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            Column(modifier = Modifier.navigationBarsPadding()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    CampusVerseButton(
-                        text = continueButtonText,
-                        onClick = onContinue,
-                        enabled = isContinueEnabled,
-                        isLoading = isLoading,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CampusVerseButton(
+                            text = continueButtonText,
+                            onClick = onContinue,
+                            enabled = isContinueEnabled,
+                            isLoading = isLoading,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
+                bottomBarContent?.invoke()
             }
         },
         containerColor = MaterialTheme.colorScheme.background

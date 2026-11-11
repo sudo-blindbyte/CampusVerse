@@ -63,6 +63,7 @@ import com.campusverse.app.ui.components.CampusVerseTopBar
 fun CommunityScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCommunityDetail: (String) -> Unit = {},
+    onNavigateToRoute: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: CommunityViewModel = viewModel()
 ) {
@@ -82,6 +83,12 @@ fun CommunityScreen(
                 title = "Community",
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
+            )
+        },
+        bottomBar = {
+            com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                currentRoute = com.campusverse.app.navigation.Screen.CommunityList.route,
+                onNavigate = { route -> onNavigateToRoute?.invoke(route) }
             )
         },
         modifier = modifier.fillMaxSize(),
@@ -252,6 +259,7 @@ fun CommunityScreen(
         if (selectedCommunityId != null) {
             androidx.compose.material3.ModalBottomSheet(
                 onDismissRequest = { selectedCommunityId = null },
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                 containerColor = MaterialTheme.colorScheme.surface
             ) {
                 when (val dState = detailState) {

@@ -62,6 +62,7 @@ import com.campusverse.app.ui.components.CampusVerseTopBar
 @Composable
 fun EventsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToRoute: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: EventsViewModel = viewModel()
 ) {
@@ -116,6 +117,12 @@ fun EventsScreen(
                 title = "Events",
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
+            )
+        },
+        bottomBar = {
+            com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                currentRoute = com.campusverse.app.navigation.Screen.StudentHome.route,
+                onNavigate = { route -> onNavigateToRoute?.invoke(route) }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },

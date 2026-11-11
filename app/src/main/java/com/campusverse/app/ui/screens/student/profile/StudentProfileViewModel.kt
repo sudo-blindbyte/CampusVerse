@@ -58,34 +58,63 @@ class StudentProfileViewModel(
         location: String?,
         degree: String,
         branch: String,
-        semester: Int,
-        cgpa: Double,
+        semesterText: String,
+        cgpaText: String,
         skills: List<String>
     ) {
         val currState = _uiState.value as? StudentProfileUiState.Success ?: return
 
-        // Validation
-        if (fullName.isBlank()) {
-            _uiState.value = currState.copy(errorMessage = "Full name cannot be blank.")
+        // 1. Full Name Validation
+        val trimmedName = fullName.trim()
+        if (trimmedName.isBlank()) {
+            _uiState.value = currState.copy(errorMessage = "Full Name cannot be blank.")
             return
         }
-        if (cgpa < 0.0 || cgpa > 10.0) {
-            _uiState.value = currState.copy(errorMessage = "CGPA must be between 0.0 and 10.0.")
+        if (trimmedName.length < 2) {
+            _uiState.value = currState.copy(errorMessage = "Full Name must be at least 2 characters long.")
             return
         }
-        if (semester < 1 || semester > 12) {
-            _uiState.value = currState.copy(errorMessage = "Semester must be between 1 and 12.")
+        if (!trimmedName.all { it.isLetter() || it.isWhitespace() || it == '.' || it == '-' || it == '\'' }) {
+            _uiState.value = currState.copy(errorMessage = "Full Name contains invalid special characters.")
+            return
+        }
+
+        // 2. Degree Validation
+        val trimmedDegree = degree.trim()
+        if (trimmedDegree.isBlank()) {
+            _uiState.value = currState.copy(errorMessage = "Degree / Program cannot be blank.")
+            return
+        }
+
+        // 3. Major / Department Validation
+        val trimmedBranch = branch.trim()
+        if (trimmedBranch.isBlank()) {
+            _uiState.value = currState.copy(errorMessage = "Major / Department cannot be blank.")
+            return
+        }
+
+        // 4. Semester Validation
+        val sem = semesterText.trim().toIntOrNull()
+        if (sem == null || sem < 1 || sem > 12) {
+            _uiState.value = currState.copy(errorMessage = "Please enter a valid semester number between 1 and 12.")
+            return
+        }
+
+        // 5. CGPA Validation
+        val cg = cgpaText.trim().toDoubleOrNull()
+        if (cg == null || cg < 0.0 || cg > 10.0) {
+            _uiState.value = currState.copy(errorMessage = "Please enter a valid CGPA between 0.00 and 10.00.")
             return
         }
 
         val updatedProfile = currState.profile.copy(
-            fullName = fullName.trim(),
+            fullName = trimmedName,
             bio = bio?.trim(),
             location = location?.trim(),
-            degree = degree.trim(),
-            branch = branch.trim(),
-            semester = semester,
-            cgpa = cgpa,
+            degree = trimmedDegree,
+            branch = trimmedBranch,
+            semester = sem,
+            cgpa = cg,
             skills = skills
         )
 

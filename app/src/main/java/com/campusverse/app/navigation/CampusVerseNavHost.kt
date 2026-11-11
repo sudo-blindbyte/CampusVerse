@@ -283,10 +283,26 @@ fun CampusVerseNavHost(
             }
         }
 
+        val onNavigateToStudentTab: (String) -> Unit = { route ->
+            if (route == Screen.StudentHome.route) {
+                navController.navigate(Screen.StudentHome.route) {
+                    popUpTo(Screen.StudentHome.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            } else {
+                navController.navigate(route) {
+                    popUpTo(Screen.StudentHome.route) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
+
         composable(Screen.Academics.route) {
             AcademicsScreen(
                 currentUser = currentUser,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToRoute = onNavigateToStudentTab
             )
         }
 
@@ -294,6 +310,7 @@ fun CampusVerseNavHost(
             NotesScreen(
                 currentUser = currentUser,
                 onNavigateBack = { navController.popBackStack() },
+                onNavigateToRoute = onNavigateToStudentTab,
                 viewModel = notesViewModel
             )
         }
@@ -316,6 +333,7 @@ fun CampusVerseNavHost(
                 onNavigateToCommunityDetail = { communityId ->
                     navController.navigate(Screen.CommunityDetail.createRoute(communityId))
                 },
+                onNavigateToRoute = onNavigateToStudentTab,
                 viewModel = communityViewModel
             )
         }
@@ -337,6 +355,7 @@ fun CampusVerseNavHost(
         composable(Screen.Marketplace.route) {
             MarketplaceScreen(
                 onNavigateBack = { navController.popBackStack() },
+                onNavigateToRoute = onNavigateToStudentTab,
                 viewModel = marketplaceViewModel
             )
         }
@@ -344,7 +363,8 @@ fun CampusVerseNavHost(
         composable(Screen.StudentProfile.route) {
             StudentProfileScreen(
                 currentUser = currentUser,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToRoute = onNavigateToStudentTab
             )
         }
 

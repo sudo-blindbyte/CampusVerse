@@ -167,6 +167,7 @@ fun CollegeExplorerScreen(
         if (selectedCollegeId != null) {
             androidx.compose.material3.ModalBottomSheet(
                 onDismissRequest = { selectedCollegeId = null },
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                 containerColor = MaterialTheme.colorScheme.background
             ) {
                 CollegeDetailScreen(

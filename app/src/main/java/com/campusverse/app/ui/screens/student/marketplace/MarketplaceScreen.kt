@@ -65,6 +65,7 @@ fun MarketplaceScreen(
     onNavigateBack: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit = {},
     onNavigateToCreateListing: () -> Unit = {},
+    onNavigateToRoute: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: MarketplaceViewModel = viewModel()
 ) {
@@ -86,6 +87,12 @@ fun MarketplaceScreen(
                 title = "Marketplace",
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
+            )
+        },
+        bottomBar = {
+            com.campusverse.app.ui.screens.student.components.StudentBottomBar(
+                currentRoute = com.campusverse.app.navigation.Screen.Marketplace.route,
+                onNavigate = { route -> onNavigateToRoute?.invoke(route) }
             )
         },
         floatingActionButton = {
@@ -290,6 +297,7 @@ fun MarketplaceScreen(
         if (showCreateListingSheet) {
             androidx.compose.material3.ModalBottomSheet(
                 onDismissRequest = { showCreateListingSheet = false },
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                 containerColor = MaterialTheme.colorScheme.surface
             ) {
                 Column(
@@ -381,6 +389,7 @@ fun MarketplaceScreen(
             val prod = selectedProductForDetail!!
             androidx.compose.material3.ModalBottomSheet(
                 onDismissRequest = { selectedProductForDetail = null },
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                 containerColor = MaterialTheme.colorScheme.surface
             ) {
                 Column(
