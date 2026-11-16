@@ -9,9 +9,9 @@ async function startServer() {
     await prisma.$connect();
     console.log('✅ Database connected successfully via Prisma');
 
-    const server = app.listen(PORT, () => {
-      console.log(`🚀 CampusVerse Backend API listening on port ${PORT}`);
-      console.log(`📡 Health Check: http://localhost:${PORT}/api/v1/health`);
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 CampusVerse Backend API listening on port ${PORT} (0.0.0.0 - all network interfaces)`);
+      console.log(`📡 Local Health Check: http://localhost:${PORT}/api/v1/health`);
     });
 
     const shutdown = async () => {

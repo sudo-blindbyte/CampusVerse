@@ -76,6 +76,7 @@ class NetworkAuthRepository(
         // 1. Attempt Real HTTP Request to Backend
         try {
             val payload = JSONObject().apply {
+                put("name", trimmedName)
                 put("fullName", trimmedName)
                 put("email", normalizedEmail)
                 put("password", password)

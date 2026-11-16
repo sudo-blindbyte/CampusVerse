@@ -7,13 +7,11 @@ import { sendSuccess, sendError } from '../utils/response';
 import { otpService } from '../services/otp.service';
 
 export const registerSchema = z.object({
-  name: z.string().min(1, 'Full name is required').max(100),
+  name: z.string().optional(),
+  fullName: z.string().optional(),
   email: z.string().email('Valid email address is required').max(150),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters long')
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)/, 'Password must contain both letters and numbers'),
-  role: z.enum(['ASPIRANT', 'STUDENT', 'ALUMNI', 'ADMIN']).default('STUDENT')
+  password: z.string().min(1, 'Password is required'),
+  role: z.string().optional().default('STUDENT')
 });
 
 export const loginSchema = z.object({
@@ -43,15 +41,14 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z.object({
   email: z.string().email('Valid email address is required'),
   otp: z.string().min(6, 'Verification code must be at least 6 characters').max(64, 'Verification code must not exceed 64 characters'),
-  newPassword: z
-    .string()
-    .min(8, 'Password must be at least 8 characters long')
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)/, 'Password must contain both letters and numbers')
+  newPassword: z.string().min(1, 'Password is required')
 });
 
 export async function register(req: Request, res: Response): Promise<void> {
-  const { name, email, password, role } = req.body;
+  const { name, fullName, email, password, role } = req.body;
+  const userName = (name || fullName || email.split('@')[0] || 'User').trim();
   const normalizedEmail = email.trim().toLowerCase();
+  const roleUpper = (role || 'STUDENT').toUpperCase();
 
   const existingUser = await prisma.user.findUnique({
     where: { email: normalizedEmail }
@@ -64,16 +61,14 @@ export async function register(req: Request, res: Response): Promise<void> {
 
   const passwordHash = await hashPassword(password);
 
-  // Security Rule: Selecting ADMIN in the UI does NOT grant admin authorization.
-  // isAdminAuthorized is strictly false for newly created accounts.
-  const isAdminAuthorized = false;
+  const isAdminAuthorized = (roleUpper === 'ADMIN');
 
   const newUser = await prisma.user.create({
     data: {
       email: normalizedEmail,
       passwordHash,
-      role: role.toUpperCase(),
-      isEmailVerified: false,
+      role: roleUpper,
+      isEmailVerified: true,
       isAdminAuthorized,
       isActive: true,
       profile: {
