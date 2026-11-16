@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "db:studio": "prisma studio --schema=prisma/schema.sqlite.prisma",
     "prisma:generate": "prisma generate",
     "prisma:generate:prod": "prisma generate --schema=prisma/schema.prisma",
     "prisma:generate:dev": "prisma generate --schema=prisma/schema.sqlite.prisma",
@@ -16,6 +17,9 @@
     "admin:provision": "ts-node src/scripts/provision-admin.ts",
     "db:verify": "ts-node src/scripts/verify-db-readiness.ts",
     "test": "jest --runInBand --forceExit --detectOpenHandles"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

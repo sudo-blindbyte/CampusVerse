@@ -450,19 +450,19 @@ class StudentModuleTests {
         advanceUntilIdle()
 
         // Negative check 1: Empty name
-        viewModel.saveProfile("", "bio", "bengaluru", "B.Tech", "CSE", 6, 8.5, listOf("Kotlin"))
+        viewModel.saveProfile("", "bio", "bengaluru", "B.Tech", "CSE", "6", "8.5", listOf("Kotlin"))
         advanceUntilIdle()
         var state = viewModel.uiState.value as StudentProfileUiState.Success
         assertNotNull(state.errorMessage)
 
         // Negative check 2: Invalid CGPA > 10.0
-        viewModel.saveProfile("Aarav", "bio", "bengaluru", "B.Tech", "CSE", 6, 11.5, listOf("Kotlin"))
+        viewModel.saveProfile("Aarav", "bio", "bengaluru", "B.Tech", "CSE", "6", "11.5", listOf("Kotlin"))
         advanceUntilIdle()
         state = viewModel.uiState.value as StudentProfileUiState.Success
         assertNotNull(state.errorMessage)
 
         // Valid Save
-        viewModel.saveProfile("Aarav Sharma Updated", "Updated Bio", "Bengaluru", "B.Tech", "CSE", 7, 9.2, listOf("Kotlin", "Jetpack Compose"))
+        viewModel.saveProfile("Aarav Sharma Updated", "Updated Bio", "Bengaluru", "B.Tech", "CSE", "7", "9.2", listOf("Kotlin", "Jetpack Compose"))
         advanceUntilIdle()
         state = viewModel.uiState.value as StudentProfileUiState.Success
         assertEquals("Aarav Sharma Updated", state.profile.fullName)
